@@ -46,6 +46,7 @@ requirements = [
     'numpy',
     'protobuf >= 3.8.0',
     'six',
+    'requests',
 ]
 
 test_requirements = [

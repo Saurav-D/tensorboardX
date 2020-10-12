@@ -9,3 +9,5 @@ __version__ = "dev"
 # will be overwritten if run setup.py
 # specifically, `python setup.py install` creates [version in setup.py + git SHA hash]
 # python setup.py sdist creates a decimal version number
+
+__version__ = "2.1+34d1616"

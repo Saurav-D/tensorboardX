@@ -24,6 +24,7 @@ import threading
 import time
 import multiprocessing
 import six
+from requests.exceptions import ConnectionError
 
 from .proto import event_pb2
 from .record_writer import RecordWriter, directory_check
@@ -193,6 +194,7 @@ class _EventLoggerThread(threading.Thread):
         # time to flush the writer, whichever is earlier. If we have an
         # data, write it. If not, an empty queue exception will be raised
         # and we can proceed to flush the writer.
+        connection = True
         while True:
             now = time.time()
             queue_wait_duration = self._next_flush_time - now
@@ -216,7 +218,15 @@ class _EventLoggerThread(threading.Thread):
                     # Small optimization - if there are no pending data,
                     # there's no need to flush, since each flush can be
                     # expensive (e.g. uploading a new file to a server).
-                    self._record_writer.flush()
+                    try:
+                        self._record_writer.flush()
+                        if not connection:
+                            connection = True
+                    except ConnectionError as e:
+                        if connection:
+                            connection = False
+                        continue
                     self._has_pending_data = False
                 # Do it again in flush_secs.
                 self._next_flush_time = now + self._flush_secs
+
